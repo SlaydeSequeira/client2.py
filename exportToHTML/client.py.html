@@ -1,0 +1,86 @@
+<html>
+<head>
+<title>client.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #808080;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #cc7832;}
+.s3 { color: #6a8759;}
+.s4 { color: #6897bb;}
+.s5 { color: #629755; font-style: italic;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+client.py</font>
+</center></td></tr></table>
+<pre><span class="s0">################################################################################</span>
+<span class="s0">#</span>
+<span class="s0">#  Permission is hereby granted, free of charge, to any person obtaining a</span>
+<span class="s0">#  copy of this software and associated documentation files (the &quot;Software&quot;),</span>
+<span class="s0">#  to deal in the Software without restriction, including without limitation</span>
+<span class="s0">#  the rights to use, copy, modify, merge, publish, distribute, sublicense,</span>
+<span class="s0">#  and/or sell copies of the Software, and to permit persons to whom the</span>
+<span class="s0">#  Software is furnished to do so, subject to the following conditions:</span>
+<span class="s0">#</span>
+<span class="s0">#  The above copyright notice and this permission notice shall be included in</span>
+<span class="s0">#  all copies or substantial portions of the Software.</span>
+<span class="s0">#</span>
+<span class="s0">#  THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS</span>
+<span class="s0">#  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="s0">#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="s0">#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="s0">#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING</span>
+<span class="s0">#  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER</span>
+<span class="s0">#  DEALINGS IN THE SOFTWARE.</span>
+<span class="s2">import </span><span class="s1">json</span>
+<span class="s2">import </span><span class="s1">random</span>
+<span class="s2">import </span><span class="s1">urllib.request</span>
+
+<span class="s0"># Server API URLs</span>
+<span class="s1">QUERY = </span><span class="s3">&quot;http://localhost:8080/query?id={}&quot;</span>
+
+<span class="s0"># 500 server request</span>
+<span class="s1">N = </span><span class="s4">500</span>
+
+
+<span class="s2">def </span><span class="s1">getDataPoint(quote):</span>
+    <span class="s5">&quot;&quot;&quot; Produce all the needed values to generate a datapoint &quot;&quot;&quot;</span>
+    <span class="s1">stock = quote[</span><span class="s3">'stock'</span><span class="s1">]</span>
+    <span class="s1">bid_price = float(quote[</span><span class="s3">'top_bid'</span><span class="s1">][</span><span class="s3">'price'</span><span class="s1">])</span>
+    <span class="s1">ask_price = float(quote[</span><span class="s3">'top_ask'</span><span class="s1">][</span><span class="s3">'price'</span><span class="s1">])</span>
+    <span class="s1">price = (bid_price + ask_price) / </span><span class="s4">2</span>
+    <span class="s2">return </span><span class="s1">stock</span><span class="s2">, </span><span class="s1">bid_price</span><span class="s2">, </span><span class="s1">ask_price</span><span class="s2">, </span><span class="s1">price</span>
+
+
+<span class="s2">def </span><span class="s1">getRatio(price_a</span><span class="s2">, </span><span class="s1">price_b):</span>
+    <span class="s5">&quot;&quot;&quot; Get ratio of price_a and price_b &quot;&quot;&quot;</span>
+    <span class="s2">if </span><span class="s1">price_b == </span><span class="s4">0</span><span class="s1">:</span>
+        <span class="s2">return</span>
+    <span class="s2">return </span><span class="s1">price_a / price_b</span>
+
+
+<span class="s0"># Main</span>
+<span class="s2">if </span><span class="s1">__name__ == </span><span class="s3">&quot;__main__&quot;</span><span class="s1">:</span>
+    <span class="s0"># Query the price once every N seconds.</span>
+    <span class="s2">for </span><span class="s1">_ </span><span class="s2">in </span><span class="s1">iter(range(N)):</span>
+        <span class="s1">quotes = json.loads(urllib.request.urlopen(QUERY.format(random.random())).read())</span>
+
+        <span class="s1">prices = {}</span>
+        <span class="s2">for </span><span class="s1">quote </span><span class="s2">in </span><span class="s1">quotes:</span>
+            <span class="s1">stock</span><span class="s2">, </span><span class="s1">bid_price</span><span class="s2">, </span><span class="s1">ask_price</span><span class="s2">, </span><span class="s1">price = getDataPoint(quote)</span>
+            <span class="s1">prices[stock] = price</span>
+            <span class="s1">print(</span><span class="s3">&quot;Quoted %s at (bid:%s, ask:%s, price:%s)&quot; </span><span class="s1">% (stock</span><span class="s2">, </span><span class="s1">bid_price</span><span class="s2">, </span><span class="s1">ask_price</span><span class="s2">, </span><span class="s1">price))</span>
+
+        <span class="s2">if </span><span class="s3">&quot;ABC&quot; </span><span class="s2">in </span><span class="s1">prices </span><span class="s2">and </span><span class="s3">&quot;DEF&quot; </span><span class="s2">in </span><span class="s1">prices:</span>
+            <span class="s1">price_a = prices[</span><span class="s3">&quot;ABC&quot;</span><span class="s1">]</span>
+            <span class="s1">price_b = prices[</span><span class="s3">&quot;DEF&quot;</span><span class="s1">]</span>
+            <span class="s1">ratio = getRatio(price_a</span><span class="s2">, </span><span class="s1">price_b)</span>
+            <span class="s2">if </span><span class="s1">ratio:</span>
+                <span class="s1">print(</span><span class="s3">&quot;Ratio %s&quot; </span><span class="s1">% ratio)</span>
+</pre>
+</body>
+</html>
